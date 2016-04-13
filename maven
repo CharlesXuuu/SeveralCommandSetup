@@ -1,0 +1,1 @@
+mvn install:install-file -DgroupId=org.example -DartifactId=netty-proxycache -Dversion=1.0 -Dpackaging=jar -Dfile=/home/chix/Downloads/netty-4.0.19.Final/jar/all-in-one/netty-all-4.0.19.Final.jar

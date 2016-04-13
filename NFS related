@@ -1,0 +1,187 @@
+ 
+
+
+  On dumped host
+  175  mkdir temp-fs
+  176  /export *(rw,async,no_root_squash)
+  177  sudo mount -t nfs 10.2.5.1:/export ./temp-fs/
+  178  apt-get install nfs-common
+  179  ping google.ca
+  180  apt-get install nfs-common
+  181  sudo mount -t nfs 10.2.5.1:/export ./temp
+  182  sudo mount -t nfs 10.2.5.1:/export ./temp-fs/
+  183  cd ./temp-fs/
+  184  ls
+  185  mkdir test
+  186  umount -f -l ./temp-fs
+
+  test downloading speed
+  499  ab -c 50 -n 100 10.2.5.1:80/file.img
+
+
+#
+# Example for NFSv2 and NFSv3:
+# /srv/homes       hostname1(rw,sync,no_subtree_check) hostname2(ro,sync,no_subtree_check)
+/export *(rw,async,no_root_squash)
+#
+# Example for NFSv4:
+# /srv/nfs4        gss/krb5i(rw,sync,fsid=0,crossmnt,no_subtree_check)
+# /srv/nfs4/homes  gss/krb5i(rw,sync,no_subtree_check)
+#
+
+
+  On original server
+  458  apt-get install apache2
+  459  cd /var/www/html/
+  460  ls
+  461  dd if=/dev/zero of=./file.img bs=100M count=0 
+  462  dir
+  463  ls -lh
+  464  dd if=/dev/zero of=./file.img bs=100M count=1 
+  465  ls -lh
+  466  dd if=/dev/urandom of=./file.img bs=100M count=1 
+  467  top
+  468  apt-get install nfs3
+  469  apt-get install nfs
+  470  apt-cache search nfs
+  471  apt-get install nfs-kernel-server
+  472  vi /etc/exports 
+  473  cd
+  474  mkdir export
+  475  cd export/
+  476  ls
+  477  exportfs 
+  478  exportfs -a
+  479  ls
+  480  cd ..
+  481  ls
+  482  mv export/ ../
+  483  exportfs -a
+  484  vi /etc/exports 
+  485  /etc/init.d/nfs-kernel-server restart
+  486  cd /export/
+  487  ls
+  488  ifconfig 
+  489  ifconfig eth0 mtu 65000
+  490  ifconfig eth0 mtu 65001
+  491  ifconfig eth0 mtu 65500
+  492  ifconfig eth0 mtu 65499
+  493  ifconfig eth0 mtu 65000
+  494  ifconfig eth0 mtu 65045
+  495  ifconfig eth0 mtu 651
+  496  ifconfig eth0 mtu 65100
+  497  ifconfig eth0 mtu 65150
+  498  ifconfig eth0 mtu 65000
+  499  vi /etc/exports 
+
+
+Changing configuration of apache2:
+cd /etc/apache2
+vim apache2.conf
+cd sites-enabled/
+vim 000-default.conf
+
+apache2ctl configtest
+/etc/init.d/apache2 -k restart
+
+
+ more /var/log/apache2/error.log
+
+Modify /etc/apache2/sites-eanbled/apache2.conf    Require all granted
+chmod 755 /root
+chmod 755 /root/memshare
+
+chmod /root
+chomd /root/host
+
+
+
+  438  xm sched-credit -d server1 -c 200
+  439  xm sched-credit -d server1 -c 300
+  440  xm sched-credit -d server1 -c 390
+  441  xm sched-credit -d server1 -c 0
+
+
+  451  xm sched-credit -d server3 -w 128
+  452  xm sched-credit -d server3 -w 512
+  453  sysbench --test=cpu --cpu-max-prime=50000 --num-threads=8 run
+  454  xm sched-credit -d server3 -w 128
+  455  sysbench --test=cpu --cpu-max-prime=50000 --num-threads=8 run
+  456  xm sched-credit -d server3 -w 256
+
+
+
+   39  df -h
+   40  mount /dev/xvdb /mnt/
+   41  fdisk /dev/xvdb 
+   42  df -h
+   43  mount /dev/xvdc5 /media/
+   44  mount /dev/xvdc2 /media/
+   45  mount /dev/xvdc1 /media/
+   46  cd /media/
+   47  ls
+   48  cd home/
+   49  ls
+   50  cd 
+   51  ls
+   52  df -h
+   53  umount /media/
+   54  mount -t ext3 /dev/xvdb /media/
+   55  mount -t ext4 /dev/xvdb /media/
+   56  ls
+   57  history
+
+
+   cat /proc/interrupts
+   echo 1 > /sys/devices/system/cpu/cpu1/online
+
+
+
+
+
+virt install
+
+
+virt-install -n server-test -r 1024 --disk path=/server.img,bus=virtio --accelerate --network network=default,model=virtio --connect=qemu:///system --vnc --noautoconsole -v
+
+  409  tshark
+  410  apt-get install tshark
+  412  tshark -w packet.txt -i 5001 
+  413  tshark -w packet.txt 
+  415  tshark -w packet.txt -i eth0 -q
+  423  tshark -w packet.txt -i eth0 -q
+  427  tshark -w packet.txt -i eth0 -q
+  428  tshark -r packet.txt 
+  431  man tshark
+  432  tshark
+  433  tshark -i eth0 -V
+  434  tshark -f tcp.port==5001 -i eth0 -V -c 10
+  435  tshark -f "tcp.port==5001" -i eth0 -V -c 10
+  436  tshark -f port==5001 -i eth0 -V -c 10
+  437  tshark -f port 5001 -i eth0 -V -c 10
+  438  tshark -f "tcp port 5001" -i eth0 -V -c 10
+  439  tshark -f "tcp port 5001" -i eth0 -V 
+  441  tshark -f "tcp port 5001" -i eth0 -c 100
+  442  tshark -f "tcp port 38223" -i eth0 -c 100
+  443  tshark -f "src 10.2.5.1" -i eth0 -c 100
+  446  pkill tshark
+  449  kill -9 tshark
+
+
+scp /etc/apt/sources.list 10.2.5.3:~/
+
+-bash: /usr/local/bin/vim: No such file or directory
+bash: command not found after replacing a package
+hash vim
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,255 @@
+You can create a shared drive, either a virtual disk or a raw partition, and mount the drive in each of the virtual machines. 
+
+Ramdisk
+
+in dom-0  
+dd if=/dev/zero of=/root/share.img bs=1M count=128
+
+
+Usage: xm block-attach <Domain> <BackDev> <FrontDev> <Mode> [BackDomain]
+xm block-list server2
+
+
+In KVM
+
+mknod -m 666 /dev/ram0 b 1 1
+mkfs -q /dev/ram0 8192   (8MB)
+mkdir -p memshare
+mount /dev/ram0 /root/memshare
+chmod 755 /root
+chmod 755 /root/memshare
+
+
+under root/ 
+qemu-system-x86_64 -vnc :1 -enable-kvm -m 1024 -drive file=./server.img,if=virtio -netdev tap,id=vnic1,vhost=on -device virtio-net-pci,netdev=vnic1 -fsdev local,security_model=passthrough,id=fsdev0,path=/root/host_files -device virtio-9p-pci,id=fs0,fsdev=fsdev0,mount_tag=hostshare &
+
+
+qemu-system-x86_64 -vnc :1 -enable-kvm -m 3096 -drive file=./server.img,if=virtio -netdev tap,id=vnic1,vhost=on -device virtio-net-pci,netdev=vnic1 -fsdev local,security_model=passthrough,id=fsdev0,path=/mnt/tmp -device virtio-9p-pci,id=fs0,fsdev=fsdev0,mount_tag=hostshare &
+
+
+Inside
+ mkdir /root/host
+mount -t 9p -o trans=virtio,version=9p2000.L hostshare /root/host
+chmod /root
+chomd /root/host
+
+Tmpfs
+How to mount Tmpfs
+
+mkdir -p /mnt/tmp
+mount -t tmpfs -o size=20m tmpfs /mnt/tmp
+
+
+
+Using ramdisk 5MB file
+guest shared folder dd write speed: 82MB/s
+guest local disk dd write speed: 39.6MB/s
+
+host shared folder dd write speed: 355MB/s
+host local folder dd write speed: 42MB/s
+
+guest apache2 sending speed: 34.3MB/s (wget)
+host apache2 sending speed: 82.MB/s (wget)
+
+100 connection guest apache2 sending time & energy: 4.470 14.3419W
+100 connection host apache2 sending time & energy: 4.472 9.2977W
+
+200 connection guest apache2 sending time & energy: 8.942 14.3419W
+200 connection host apache2 sending time & energy:  8.943 9.5677W
+
+
+
+
+Using tmpfs 5MB file
+guest shared folder dd write speed: 73.9MB/s
+guest local disk dd write speed: 36.3MB/s
+
+host shared folder dd write speed: 1.7GB/s
+host local folder dd write speed: 46.2MB/s
+
+guest apache2 sending speed: 34.8MB/s (wget)
+host apache2 sending speed: 110MB/s (wget)
+
+100 connection guest apache2 sending time & energy: 4.477 13.40W
+100 connection host apache2 sending time & energy: 4.469 9.08W
+
+200 connection guest apache2 sending time & energy: 8.942 14.6419W
+200 connection host apache2 sending time & energy:  8.943 9.1977W
+
+
+
+
+Using tmpfs 100MB file
+guest shared folder dd write speed: 73MB/s
+guest shared folder dd write speed: 82MB/s
+
+host shared folder dd write speed: 2.3GB/s
+guest apache2 sending speed: 50.6MB/s (wget)
+host apache2 sending speed: 112MB/s (wget)
+
+100 connection guest apache2 sending time & energy: 4.477 13.40W
+100 connection host apache2 sending time & energy: 4.469 9.08W
+
+200 connection guest apache2 sending time & energy: 8.942 14.6419W
+200 connection host apache2 sending time & energy:  8.943 9.1977W
+
+Using tmpfs 100MB file 
+blksize=50MB * 2
+15.74W 9.11W
+blksize=1MB * 100
+
+
+
+
+
+
+
+
+
+qemu-system-x86_64 -vnc :1 -enable-kvm -smp 4 -m 3096M -drive file=./server.img,if=virtio -netdev tap,id=vnic1,vhost=on -device virtio-net-pci,netdev=vnic1 -fsdev local,security_model=passthrough,id=fsdev0,path=/root/tmpfstest -device virtio-9p-pci,id=fs0,fsdev=fsdev0,mount_tag=hostshare &
+
+
+Table 1 dd writing blocksize=1M speed INSIDE VM
+		tmpfs	ramfs	harddrive
+1M file		56.0MB		12.9MB
+10M file	71.4MB		57.6MB
+20M file	71.6MB		72.1MB
+50M file	72.6MB		84.0MB
+100M file	72.8MB		93.9MB
+
+Table 2 dd writing blocksize=1M speed HOST
+		tmpfs	ramfs	harddrive
+1M file		1.1GB		13.9MB
+10M file	1.9GB		50.1MB
+20M file	2.0GB		61.5MB
+50M file	2.3GB		69.9MB
+100M file	2.4GB		73.8MB
+
+
+Table 3 ab 20 connection apache2
+		host sending	vm sending
+		energy		energy		transfer rate (both)
+100M file	9.75W		15.38W		114809.12 [Kbytes/sec]
+
+
+
+Table 4 wget download apache2
+		host sending			vm sending
+		throughput	energy		throughput	energy
+100M file	111 MB/s	6.19W		51.0 MB/s	16.7781W
+
+
+
+
+
+find / -name 'ffmpeg' -type d
+
+PATH="$PATH:$HOME/bin" PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./configure \
+  --prefix="$HOME/ffmpeg_build" \
+  --extra-cflags="-I$HOME/ffmpeg_build/include" \
+  --extra-ldflags="-L$HOME/ffmpeg_build/lib" \
+  --bindir="$HOME/bin" \
+  --extra-libs="-ldl" \
+  --enable-gpl \
+  --enable-libass \
+  --enable-libfdk-aac \
+  --enable-libfreetype \
+  --enable-libtheora \
+  --enable-libvorbis \
+  --enable-libx264 \
+  --enable-nonfree \
+  --enable-x11grab
+
+/root/bin/ffmpeg -i /home/chix/encoder/Cloud.Atlas.2012.720p.BluRay.x264.DTS-WiKi.mkv -threads 4 -s 640x268 -vcodec h264 -ss 00:01:00 -to 00:01:10 /home/chix/backend/test.ts
+
+/root/bin/ffmpeg -codecs
+
+ffmpeg -ss 00:03:00 -i input -threads 4 -s 640x268 -to 00:02:00 -c copy out.mp4
+-------------------------------alt-------------------------------------------
+vcodec="h264"
+acodec="mpga"
+bitrate="2500"
+arate="192"
+samplerate=48000
+ext="mpg"
+mux="ts"
+vlc="/usr/bin/vlc"
+fmt="mpg"
+dst="/home/adam/test/"
+
+for a in *$fmt; do
+$vlc -I dummy -vvv "/home/adam/test/" --sout "#transcode{vcodec=$vcodec,venc=x264{profile=main,level=3.0,hrd=cbr,bframes=2},vb=$bitrate,acodec=$acodec,ab=$arate,samplerate=$samplerate,channels=2}:standard{mux=$mux,dst=\"$dst$a.$ext\",ac$
+done
+-------------------------------alt----------------------------------------------
+
+"mpeg4ESVideoTest" stream, from the file "test.m4e"
+Play this stream using the URL "rtsp://207.23.161.57:8554/mpeg4ESVideoTest"
+
+"h264ESVideoTest" stream, from the file "test.264"
+Play this stream using the URL "rtsp://207.23.161.57:8554/h264ESVideoTest"
+
+"h265ESVideoTest" stream, from the file "test.265"
+Play this stream using the URL "rtsp://207.23.161.57:8554/h265ESVideoTest"
+
+"mpeg1or2AudioVideoTest" stream, from the file "test.mpg"
+Play this stream using the URL "rtsp://207.23.161.57:8554/mpeg1or2AudioVideoTest"
+
+"mpeg1or2ESVideoTest" stream, from the file "testv.mpg"
+Play this stream using the URL "rtsp://207.23.161.57:8554/mpeg1or2ESVideoTest"
+
+"mp3AudioTest" stream, from the file "test.mp3"
+Play this stream using the URL "rtsp://207.23.161.57:8554/mp3AudioTest"
+
+"wavAudioTest" stream, from the file "test.wav"
+Play this stream using the URL "rtsp://207.23.161.57:8554/wavAudioTest"
+
+"amrAudioTest" stream, from the file "test.amr"
+Play this stream using the URL "rtsp://207.23.161.57:8554/amrAudioTest"
+
+"vobTest" stream, from the file "test.vob"
+Play this stream using the URL "rtsp://207.23.161.57:8554/vobTest"
+
+"mpeg2TransportStreamTest" stream, from the file "test.ts"
+Play this stream using the URL "rtsp://207.23.161.57:8554/mpeg2TransportStreamTest"
+
+"aacAudioTest" stream, from the file "test.aac"
+Play this stream using the URL "rtsp://207.23.161.57:8554/aacAudioTest"
+
+"dvVideoTest" stream, from the file "test.dv"
+Play this stream using the URL "rtsp://207.23.161.57:8554/dvVideoTest"
+
+"ac3AudioTest" stream, from the file "test.ac3"
+Play this stream using the URL "rtsp://207.23.161.57:8554/ac3AudioTest"
+
+"matroskaFileTest" stream, from the file "test.mkv"
+Play this stream using the URL "rtsp://207.23.161.57:8554/matroskaFileTest"
+
+"webmFileTest" stream, from the file "test.webm"
+Play this stream using the URL "rtsp://207.23.161.57:8554/webmFileTest"
+
+"oggFileTest" stream, from the file "test.ogg"
+Play this stream using the URL "rtsp://207.23.161.57:8554/oggFileTest"
+
+"opusFileTest" stream, from the file "test.opus"
+Play this stream using the URL "rtsp://207.23.161.57:8554/opusFileTest"
+
+"mpeg2TransportStreamFromUDPSourceTest" stream, from a UDP Transport Stream input source 
+	(IP multicast address 239.255.42.42, port 1234)
+Play this stream using the URL "rtsp://207.23.161.57:8554/mpeg2TransportStreamFromUDPSourceTest"
+
+(We use port 8000 for optional RTSP-over-HTTP tunneling.)
+
+
+
+
+
+
+multi-vnic
+
+
+qemu-system-x86_64 -vnc :1 -enable-kvm -m 3096 -drive file=./server.img,if=virtio -netdev tap,id=vnic1,vhost=on -device virtio-net-pci,netdev=vnic1 -netdev tap,id=vnic2,vhost=on -device virtio-net-pci,netdev=vnic2 -fsdev local,security_model=passthrough,id=fsdev0,path=/mnt/tmp -device virtio-9p-pci,id=fs0,fsdev=fsdev0,mount_tag=hostshare &
+
+mount -t tmpfs -o size=20m tmpfs /mnt/tmp
+
+mount -t 9p -o trans=virtio,version=9p2000.L hostshare /root/host
+
