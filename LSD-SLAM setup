@@ -1,0 +1,28 @@
+Ubuntu 14.04
+
+#add sources.list
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+
+#add keys
+sudo apt-key adv --keyserver hkp://pool.sks-keyservers.net --recv-key 0xB01FA116
+
+sudo apt-get install python-rosinstall
+
+sudo apt-get install ros-indigo-desktop-full
+
+mkdir ~/rosbuild_ws
+cd ~/rosbuild_ws
+
+rosws init . /opt/ros/indigo
+
+mkdir package_dir
+
+rosws set ~/rosbuild_ws/package_dir -t .
+
+echo "source /home/chix/Reporsitory/rosbuild_ws/setup.bash" >> ~/.bashrc
+
+bash
+
+cd package_dir
+
+sudo apt-get install ros-indigo-libg2o ros-indigo-cv-bridge liblapack-dev libblas-dev freeglut3-dev libqglviewer-dev libsuitesparse-dev libx11-dev
