@@ -70,9 +70,9 @@ Need to get 36.7 MB of archives.
 After this operation, 170 MB of additional disk space will be used.
 
 
-192.168.1.244 chix @
+192.168.1.244
 192.168.1.89
-192.168.1.132 Xen VM root test12345
+192.168.1.132 root test12345
 
 
 
