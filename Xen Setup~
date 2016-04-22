@@ -1,6 +1,6 @@
 Create and format disk image file
 
-
+Method 1:
 
 Get Netboot Images
 
@@ -33,6 +33,54 @@ disk = ['tap:aio:/var/lib/xen/images/xenguest.img,xvda1,w', 'tap:aio:/var/lib/xe
 root = "/dev/xvda1 ro"
 
 xl create -c xenguest.cfg
+
+
+Method 2:
+
+Lets compile kernel  for new guest domain-
+
+user@dom0# wget http://www.kernel.org/pub/linux/kernel/v3.0/linux-3.7.1.tar.gz
+user@dom0# tar xvf linux-3.7.1.tar.gz
+user@dom0# cd linux-3.7.1
+user@dom0# make menuconfig
+
+Set following parameters
+
+Processor type and features 
+        High memory support (64GB)
+        PAE (Physical Address Extension) Support - enabled
+
+Processor type and features 
+        Allocate 2nd-level pagetables from highmem - disabled
+
+Verify .config file have following parameters set
+
+CONFIG_XEN=y 
+CONFIG_PARAVIRT_GUEST=y 
+CONFIG_PARAVIRT=y 
+CONFIG_XEN_PVHVM=y 
+CONFIG_XEN_MAX_DOMAIN_MEMORY=128 
+CONFIG_XEN_SAVE_RESTORE=y 
+CONFIG_PCI_XEN=y 
+CONFIG_XEN_PCIDEV_FRONTEND=y 
+CONFIG_XEN_BLKDEV_FRONTEND=y 
+CONFIG_XEN_NETDEV_FRONTEND=y 
+CONFIG_INPUT_XEN_KBDDEV_FRONTEND=y 
+CONFIG_HVC_XEN=y 
+CONFIG_XEN_FBDEV_FRONTEND=y 
+CONFIG_XEN_DEV_EVTCHN=y 
+CONFIG_XEN_XENBUS_FRONTEND=y
+Now hit make command for kernel compilation, and it will create vmlinux kernel file.
+
+root@dom0# make
+
+
+sudo dd if=/dev/zero of=/var/lib/xen/images/xenguest.img bs=1M seek=10240 count=0
+sudo mkfs.ext4 -F /var/lib/xen/images/xenguest.img
+sudo dd if=/dev/zero of=/var/lib/xen/images/xenguest.swap bs=1M seek=2048 count=0
+sudo mkswap /var/lib/xen/images/xenguest.swap
+
+mount -o loop ./xenguest.img /mnt/xenimage/
 
 
 
@@ -70,9 +118,9 @@ Need to get 36.7 MB of archives.
 After this operation, 170 MB of additional disk space will be used.
 
 
-192.168.1.244
-192.168.1.89
-192.168.1.132 root test12345
+192.168.1.244 chix @
+192.168.1.89  KVM VM root test12345
+192.168.1.230 Xen VM root test12345
 
 
 
