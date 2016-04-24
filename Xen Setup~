@@ -82,6 +82,21 @@ sudo mkswap /var/lib/xen/images/xenguest.swap
 
 mount -o loop ./xenguest.img /mnt/xenimage/
 
+debootstrap --arch amd64 sid /mnt/xenimage
+ 
+In /mnt/etc/fstab
+/dev/xvda1 / ext4 defaults 0 1
+proc /proc proc defaults 0 0
+
+In /mnt/etc/hostname
+hostname
+
+In /mnt/etc/network/interfaces
+auto lo
+iface lo inet loopback
+auto eth0
+iface eth0 inet dhcp
+
 
 
 
@@ -89,6 +104,13 @@ manually using WiFi
 
 sudo iwconfig wlan0 essid "SFUNET"
 sudo dhclient -v wlan0
+
+sudo vim /etc/NetworkManager/NetworkManager.conf  false->true
+sudo service network-manager restart
+
+echo "manual" | sudo tee /etc/init/network-manager.override
+sudo rm /etc/init/network-manager.override
+
 
 Debian package
 ii  libjaxen-java                         1.1.6-1                             all          Java XPath engine
