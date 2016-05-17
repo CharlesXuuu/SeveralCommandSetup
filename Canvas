@@ -1,0 +1,6 @@
+#make dir with same structure
+find src -type d -exec mkdir -p utf/{} \; 
+
+#change encoding from GBK to UTF-8
+find src -type f -exec iconv -f GBK -t UTF-8 {} -o utf/{} \;
+

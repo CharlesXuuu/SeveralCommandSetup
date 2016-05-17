@@ -1,0 +1,5 @@
+有时玩 Git 时改了不少东西，然后用尝试用 git pull 回到最新版本时提示很多冲突（conflicts）。可是根本就不想处理冲突，只希望直接回到最新版本。这就遇到了一个问题，如何忽略所有冲突，直接恢复到最新版本的代码。方法如下：
+git fetch --all
+git reset --hard origin/master
+其中第一句是下载最新的代码，但并不 merge 或者 rebase。
+第二句就是强行将 HEAD 重设为最新的版本。后面的 origin/master 根据实际情况改。
