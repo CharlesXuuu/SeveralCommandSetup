@@ -4,3 +4,11 @@ find src -type d -exec mkdir -p utf/{} \;
 #change encoding from GBK to UTF-8
 find src -type f -exec iconv -f GBK -t UTF-8 {} -o utf/{} \;
 
+
+
+
+
+Gradle中，每一个待编译的工程都叫一个Project。每一个Project在构建的时候都包含一系列的Task。比如一个Android APK的编译可能包含：Java源码编译Task、资源编译Task、JNI编译Task、lint检查Task、打包生成APK的Task、签名Task等。
+
+
+每一个Library和每一个App都是单独的Project。根据Gradle的要求，每一个Project在其根目录下都需要有一个build.gradle。build.gradle文件就是该Project的编译脚本，类似于Makefile。
